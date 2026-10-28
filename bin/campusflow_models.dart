@@ -1,5 +1,13 @@
-import 'package:campusflow_models/campusflow_models.dart' as campusflow_models;
+import 'package:campusflow_models/campusflow_models.dart';
 
-void main(List<String> arguments) {
-  print('Hello world: ${campusflow_models.calculate()}!');
+Future<void> main() async {
+  final depot = FakeTaskRepository();
+  try {
+    final taches = await depot.charger();
+    print('${taches.length} tâche(s) : $taches');
+  } catch (e) {
+    print('Erreur : $e');
+  } finally {
+    print('Fin du chargement');
+  }
 }
