@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../models/task.dart';
 
 class FormulaireScreen extends StatefulWidget {
@@ -39,9 +40,8 @@ class _FormulaireScreenState extends State<FormulaireScreen> {
         cours: _cours.text.trim(),
         echeance: _echeance,
       );
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Tâche enregistrée')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Tâche enregistrée')));
       Navigator.of(context).pop(t);
     }
   }
