@@ -1,77 +1,91 @@
 import 'package:flutter/material.dart';
-import '../data/taches_demo.dart';
-import '../models/task.dart';
-import 'detail_tache.dart';
-import 'formulaire_screen.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
-class EcheancesScreen extends StatefulWidget {
+import '../models/task.dart';
+import '../providers/taches_provider.dart';
+import 'detail_tache.dart';
+
+enum Filtre { aFaire, faites, enRetard }
+
+class EcheancesScreen extends ConsumerStatefulWidget {
   const EcheancesScreen({super.key});
 
   @override
-  State<EcheancesScreen> createState() => _EcheancesScreenState();
+  ConsumerState<EcheancesScreen> createState() => _EcheancesScreenState();
 }
 
-class _EcheancesScreenState extends State<EcheancesScreen> {
-  final List<Task> _taches = List.of(tachesDemo);
-  int _onglet = 0;
+class _EcheancesScreenState extends ConsumerState<EcheancesScreen> {
+  Filtre _filtre = Filtre.aFaire;
   String? _selectionId;
 
-  Task? get _selection {
-    for (final t in _taches) {
+  List<Task> _tachesFiltrees() => switch (_filtre) {
+    Filtre.aFaire => ref.watch(tachesAFaireProvider),
+    Filtre.faites => ref.watch(tachesFaitesProvider),
+    Filtre.enRetard => ref.watch(tachesEnRetardProvider),
+  };
+
+  Task? _selection() {
+    for (final t in ref.watch(listeTachesProvider)) {
       if (t.id == _selectionId) return t;
     }
     return null;
   }
 
-  void _marquerFait(Task t) {
-    setState(() {
-      final i = _taches.indexWhere((x) => x.id == t.id);
-      _taches[i] = t.copyWith(fait: true);
-    });
-  }
-
-  Future<void> _ajouter() async {
-    final nouvelle = await Navigator.of(context).push<Task>(
-      MaterialPageRoute(builder: (_) => const FormulaireScreen()),
-    );
-    if (nouvelle != null) setState(() => _taches.add(nouvelle));
-  }
-
-  void _ouvrir(Task t, bool large) {
-    if (large) {
-      setState(() => _selectionId = t.id);
-    } else {
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => DetailScreen(tache: t, onFait: _marquerFait),
+  Widget _filtres() {
+    return Padding(
+      padding: const EdgeInsets.all(12),
+      child: SizedBox(
+        width: double.infinity,
+        child: SegmentedButton<Filtre>(
+          showSelectedIcon: false,
+          segments: const [
+            ButtonSegment(value: Filtre.aFaire, label: Text('À faire')),
+            ButtonSegment(value: Filtre.faites, label: Text('Faites')),
+            ButtonSegment(value: Filtre.enRetard, label: Text('En retard')),
+          ],
+          selected: {_filtre},
+          onSelectionChanged: (s) => setState(() => _filtre = s.first),
         ),
-      );
-    }
+      ),
+    );
   }
 
   Widget _liste(bool large) {
+    final taches = _tachesFiltrees();
+    if (taches.isEmpty) {
+      return const Center(child: Text('Aucune tâche dans cette catégorie'));
+    }
     return ListView.builder(
-      itemCount: _taches.length,
+      itemCount: taches.length,
       itemBuilder: (context, i) {
-        final t = _taches[i];
+        final t = taches[i];
         return ListTile(
-          leading: Icon(t.fait ? Icons.check_circle : Icons.assignment_outlined),
+          leading: Icon(
+            t.fait ? Icons.check_circle : Icons.assignment_outlined,
+          ),
           title: Text(t.titre, maxLines: 1, overflow: TextOverflow.ellipsis),
           subtitle: Text('${t.cours} · ${t.echeanceTexte}'),
           selected: large && t.id == _selectionId,
-          onTap: () => _ouvrir(t, large),
+          onTap: () {
+            if (large) {
+              setState(() => _selectionId = t.id);
+            } else {
+              context.push('/taches/${t.id}');
+            }
+          },
         );
       },
     );
   }
 
-  Widget _contenuEcheances() {
+  Widget _contenu() {
     return LayoutBuilder(
       builder: (context, constraints) {
         final large = constraints.maxWidth >= 840;
         if (!large) return _liste(false);
 
-        final sel = _selection;
+        final sel = _selection();
         return Row(
           children: [
             Expanded(flex: 2, child: _liste(true)),
@@ -80,7 +94,11 @@ class _EcheancesScreenState extends State<EcheancesScreen> {
               flex: 3,
               child: sel == null
                   ? const Center(child: Text('Sélectionne une tâche'))
-                  : DetailTache(tache: sel, onFait: () => _marquerFait(sel)),
+                  : DetailTache(
+                      tache: sel,
+                      onFait: () =>
+                          ref.read(tachesProvider.notifier).marquerFait(sel.id),
+                    ),
             ),
           ],
         );
@@ -90,26 +108,16 @@ class _EcheancesScreenState extends State<EcheancesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const titres = ['Cette semaine', 'Cours', 'Profil'];
     return Scaffold(
-      appBar: AppBar(title: Text(titres[_onglet])),
-      body: _onglet == 0
-          ? _contenuEcheances()
-          : Center(child: Text('${titres[_onglet]} : prochaine séance')),
-      floatingActionButton: _onglet == 0
-          ? FloatingActionButton(
-              onPressed: _ajouter,
-              child: const Icon(Icons.add),
-            )
-          : null,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _onglet,
-        onDestinationSelected: (i) => setState(() => _onglet = i),
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.event), label: 'Échéances'),
-          NavigationDestination(icon: Icon(Icons.school), label: 'Cours'),
-          NavigationDestination(icon: Icon(Icons.person), label: 'Profil'),
+      body: Column(
+        children: [
+          _filtres(),
+          Expanded(child: _contenu()),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => context.push('/taches/nouvelle'),
+        child: const Icon(Icons.add),
       ),
     );
   }

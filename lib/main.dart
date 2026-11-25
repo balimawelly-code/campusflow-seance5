@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
-import 'screens/echeances_screen.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-void main() => runApp(const CampusFlowApp());
+import 'router/app_router.dart';
+
+void main() => runApp(const ProviderScope(child: CampusFlowApp()));
 
 class CampusFlowApp extends StatelessWidget {
   const CampusFlowApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'CampusFlow',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(colorSchemeSeed: Colors.red, useMaterial3: true),
-      home: const EcheancesScreen(),
+      routerConfig: appRouter,
     );
   }
 }

@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../models/task.dart';
+import '../providers/taches_provider.dart';
 
-class FormulaireScreen extends StatefulWidget {
+class FormulaireScreen extends ConsumerStatefulWidget {
   const FormulaireScreen({super.key});
 
   @override
-  State<FormulaireScreen> createState() => _FormulaireScreenState();
+  ConsumerState<FormulaireScreen> createState() => _FormulaireScreenState();
 }
 
-class _FormulaireScreenState extends State<FormulaireScreen> {
+class _FormulaireScreenState extends ConsumerState<FormulaireScreen> {
   final _formKey = GlobalKey<FormState>();
   final _titre = TextEditingController();
   final _cours = TextEditingController();
@@ -32,17 +35,25 @@ class _FormulaireScreenState extends State<FormulaireScreen> {
     if (d != null) setState(() => _echeance = d);
   }
 
-  void _enregistrer() {
-    if (_formKey.currentState!.validate()) {
-      final t = Task(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        titre: _titre.text.trim(),
-        cours: _cours.text.trim(),
-        echeance: _echeance,
-      );
+  Future<void> _enregistrer() async {
+    if (!_formKey.currentState!.validate()) return;
+    final t = Task(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      titre: _titre.text.trim(),
+      cours: _cours.text.trim(),
+      echeance: _echeance,
+    );
+    try {
+      await ref.read(tachesProvider.notifier).ajouter(t);
+      if (!mounted) return;
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text('Tâche enregistrée')));
-      Navigator.of(context).pop(t);
+      context.pop();
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Enregistrement impossible')),
+      );
     }
   }
 
