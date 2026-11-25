@@ -1,5 +1,4 @@
-// Version minimale. Si tu as déjà ton Task de la séance 3 (campusflow_models),
-// copie-le ici à la place et adapte les champs utilisés dans les écrans.
+// Modèle Task de l'application (avec JSON pour la séance 7).
 class Task {
   final String id;
   final String titre;
@@ -15,7 +14,12 @@ class Task {
     this.fait = false,
   });
 
-  Task copyWith({String? titre, String? cours, DateTime? echeance, bool? fait}) {
+  Task copyWith({
+    String? titre,
+    String? cours,
+    DateTime? echeance,
+    bool? fait,
+  }) {
     return Task(
       id: id,
       titre: titre ?? this.titre,
@@ -24,6 +28,24 @@ class Task {
       fait: fait ?? this.fait,
     );
   }
+
+  /// Construit une tâche à partir du JSON renvoyé par l'API.
+  factory Task.fromJson(Map<String, dynamic> json) => Task(
+    id: json['id'].toString(),
+    titre: json['titre'] as String,
+    cours: json['cours'] as String,
+    echeance: DateTime.parse(json['echeance'] as String),
+    fait: json['fait'] as bool? ?? false,
+  );
+
+  /// Transforme la tâche en JSON pour l'envoyer à l'API.
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'titre': titre,
+    'cours': cours,
+    'echeance': echeance.toIso8601String(),
+    'fait': fait,
+  };
 
   String get echeanceTexte =>
       '${echeance.day.toString().padLeft(2, '0')}/'

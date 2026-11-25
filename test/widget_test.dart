@@ -1,30 +1,34 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
+import 'package:campusflow_ecrans/models/task.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:campusflow_ecrans/main.dart';
-
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  test('Task.fromJson lit les champs et toJson les réécrit', () {
+    final tache = Task.fromJson({
+      'id': 1,
+      'titre': 'Rendre le TP',
+      'cours': 'Programmation Mobile',
+      'echeance': '2026-11-30T23:59:00',
+      'fait': false,
+    });
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    expect(tache.id, '1');
+    expect(tache.titre, 'Rendre le TP');
+    expect(tache.echeance.day, 30);
+    expect(tache.fait, false);
+    expect(tache.toJson()['cours'], 'Programmation Mobile');
+  });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+  test('copyWith ne change que le champ demandé', () {
+    final tache = Task(
+      id: '1',
+      titre: 'Rendre le TP',
+      cours: 'Programmation Mobile',
+      echeance: DateTime(2026, 11, 30),
+    );
+    final faite = tache.copyWith(fait: true);
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    expect(faite.fait, true);
+    expect(faite.titre, tache.titre);
+    expect(tache.fait, false); // l'original ne change pas (immuable)
   });
 }
