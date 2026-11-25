@@ -1,0 +1,73 @@
+{
+  "taches": [
+    {
+      "id": 1,
+      "titre": "Rendu TP CampusFlow",
+      "echeance": "2026-11-22T23:59:00",
+      "terminee": false,
+      "description": "Envoyer le lien du dépôt GitHub au professeur.",
+      "coursId": "c1"
+    },
+    {
+      "id": 2,
+      "titre": "Exposé hallucinations des LLM",
+      "echeance": "2026-11-25T10:00:00",
+      "terminee": false,
+      "description": "Préparer les diapositives et la démonstration.",
+      "coursId": "c2"
+    },
+    {
+      "id": 3,
+      "titre": "Projet Spark",
+      "echeance": "2026-11-19T18:00:00",
+      "terminee": false,
+      "description": null,
+      "coursId": "c3"
+    },
+    {
+      "id": 4,
+      "titre": "Examen UX",
+      "echeance": "2026-11-30T08:00:00",
+      "terminee": false,
+      "description": null,
+      "coursId": "c1"
+    },
+    {
+      "id": 5,
+      "titre": "Lire le chapitre 4",
+      "echeance": "2026-11-17T08:00:00",
+      "terminee": true,
+      "description": null,
+      "coursId": "c2"
+    }
+  ],
+  "cours": [
+    {
+      "id": "c1",
+      "nom": "Programmation mobile",
+      "enseignant": "M. Compaoré",
+      "horaire": "Lundi · 08:00"
+    },
+    {
+      "id": "c2",
+      "nom": "IA générative",
+      "enseignant": null,
+      "horaire": "Mardi · 08:00"
+    },
+    {
+      "id": "c3",
+      "nom": "Big Data Scala-Spark",
+      "enseignant": null,
+      "horaire": "Jeudi · 14:00"
+    }
+  ],
+  "utilisateurs": [
+    {
+      "id": "u1",
+      "nom": "Fatimata Ouédraogo",
+      "email": "etudiant@campusflow.bf",
+      "filiere": "Master 1 Informatique",
+      "motDePasse": "campus2026"
+    }
+  ]
+}
